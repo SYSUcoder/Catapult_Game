@@ -35,5 +35,22 @@ bool FinishScene::init()
 	}
 	addChild(label, 1);
 
+	MenuItemFont::setFontName("Marker Felt");
+	MenuItemFont::setFontSize(40);
+	MenuItemFont* newGame = MenuItemFont::create("Restart", this, menu_selector(FinishScene::onNewGame));
+
+	auto menu = Menu::createWithItem(newGame);
+	menu->alignItemsVertically();
+	addChild(menu, 1);
+
 	return true;
+}
+
+void FinishScene::onNewGame(Ref *Sender)
+{
+	CCScene *scene = HelloPhysicsWorld::createScene();
+
+	CCDirector::sharedDirector()->replaceScene(CCTransitionSlideInR::create(1.2f, scene));
+
+
 }

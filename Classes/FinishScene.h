@@ -3,6 +3,7 @@
 
 
 #include "cocos2d.h"
+#include "HelloPhysicsWorld.h"
 
 USING_NS_CC;
 
@@ -16,6 +17,7 @@ public:
 
 	CREATE_FUNC(FinishScene);
 
+	void onNewGame(Ref *Sender);
 
 };
 

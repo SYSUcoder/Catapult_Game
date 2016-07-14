@@ -13,7 +13,7 @@ USING_NS_CC;
 Scene* HelloPhysicsWorld::createScene()
 {
 	auto scene = Scene::createWithPhysics(); 
-	// scene->getPhysicsWorld()->setDebugDrawMask(PhysicsWorld::DEBUGDRAW_ALL);   
+	scene->getPhysicsWorld()->setDebugDrawMask(PhysicsWorld::DEBUGDRAW_ALL);   
 
 	auto layer = HelloPhysicsWorld::create();
 	scene->addChild(layer);
@@ -41,8 +41,17 @@ bool HelloPhysicsWorld::init()
 	preTouchPoint = Vec2::ZERO;
 	currTouchPoint = Vec2::ZERO;
 
+	//定义世界的边界
+	auto body = PhysicsBody::createEdgeBox(Size(borderSize.width, borderSize.height + 25));
+	body->setContactTestBitmask(0x01);
+	auto edgeNode = Node::create();
+	edgeNode->setPosition(Vec2(visibleSize.width / 2, visibleSize.height / 2 + 95));
+	edgeNode->setPhysicsBody(body);
+	this->addChild(edgeNode);
+
 	// map
-	auto mapSprite = Sprite::create("map.jpg");
+	auto mapSprite = Sprite::create("map1.jpg");
+	mapSprite->setScale(1.15, 1.15);
 	mapSprite->setPosition(Vec2(visibleSize.width / 2 + origin.x, visibleSize.height / 2 + origin.y));
 	addChild(mapSprite, 0);
 
@@ -54,9 +63,10 @@ bool HelloPhysicsWorld::init()
 	this->addChild(label, 1);
 
 	// our battery
-	mapSprite = Sprite::create("battery.png");
-	mapSprite->setPosition(Vec2(212, 204));
-	mapSprite->setScale(0.5, 0.5);
+	mapSprite = Sprite::create("body.png");
+	mapSprite->setAnchorPoint(Vec2(0.5, 0));
+	mapSprite->setPosition(Vec2(190, 230));
+	mapSprite->setScale(0.2, 0.2);
 	mapSprite->setTag(7);
 	auto batteryBody = PhysicsBody::createBox(Size(160, 100), PHYSICSSHAPE_MATERIAL_DEFAULT, Vec2(-33, -33));
 	batteryBody->setDynamic(false);
@@ -67,10 +77,20 @@ bool HelloPhysicsWorld::init()
 	mapSprite->getPhysicsBody()->setCollisionBitmask(0x01F);
 	addChild(mapSprite);
 
+	left_head = Sprite::create("head.png");
+	left_head->setPosition(Vec2(185, 275));
+	processBarPoint.setPoint(left_head->getPosition().x, left_head->getPosition().y);
+	left_head->setScale(0.2, 0.2);
+	left_head->setTag(7);
+	
+	addChild(left_head);
+	
+
 	// enemy's battery
-	mapSprite = Sprite::create("battery1.png");
-	mapSprite->setPosition(Vec2(visibleSize.width - 212, 204));
-	mapSprite->setScale(0.5, 0.5);
+	mapSprite = Sprite::create("body1.png");
+	mapSprite->setAnchorPoint(Vec2(0.5, 0));
+	mapSprite->setPosition(Vec2(visibleSize.width - 190, 230));
+	mapSprite->setScale(0.2, 0.2);
 	mapSprite->setTag(10);
 	batteryBody = PhysicsBody::createBox(Size(160, 100), PHYSICSSHAPE_MATERIAL_DEFAULT, Vec2(33, -33));
 	batteryBody->setDynamic(false);
@@ -81,44 +101,49 @@ bool HelloPhysicsWorld::init()
 	mapSprite->getPhysicsBody()->setCollisionBitmask(0x01F);
 	addChild(mapSprite);
 
-	// point pig
-	createPigPoint(Vec2(882, 317));
-	createPigPoint(Vec2(1282, 605));
-	createPigPoint(Vec2(1284, 179));
-	createPigPoint(Vec2(1193, 368));
-	createPigPoint(Vec2(777, 179));
+    right_head = Sprite::create("head1.png");
+	right_head->setPosition(Vec2(visibleSize.width - 185, 275));
+	right_head->setScale(0.2, 0.2);
+	right_head->setTag(10);
 
-	createOurPig(Vec2(visibleSize.width - 882, 317));
-	createOurPig(Vec2(visibleSize.width - 1282, 605));
-	createOurPig(Vec2(visibleSize.width - 1284, 179));
-	createOurPig(Vec2(visibleSize.width - 1193, 368));
-	createOurPig(Vec2(visibleSize.width - 777, 179));
+	addChild(right_head);
+
+	double increase_height = 100;
+	// point pig
+	createPigPoint(Vec2(882, 317 + increase_height));
+	createPigPoint(Vec2(1282, 605 + increase_height));
+	createPigPoint(Vec2(1284, 179 + increase_height));
+	createPigPoint(Vec2(1193, 368 + increase_height));
+	createPigPoint(Vec2(777, 179 + increase_height));
+
+	createOurPig(Vec2(visibleSize.width - 882, 317 + increase_height));
+	createOurPig(Vec2(visibleSize.width - 1282, 605 + increase_height));
+	createOurPig(Vec2(visibleSize.width - 1284, 179 + increase_height));
+	createOurPig(Vec2(visibleSize.width - 1193, 368 + increase_height));
+	createOurPig(Vec2(visibleSize.width - 777, 179 + increase_height));
 
 	// middle block
-	createBlock(Vec2(visibleSize.width / 2, 175));
-	createBlock(Vec2(visibleSize.width / 2, 225));
+
 	createBlock(Vec2(visibleSize.width / 2, 275));
 	createBlock(Vec2(visibleSize.width / 2, 325));
 	createBlock(Vec2(visibleSize.width / 2, 375));
 
 	// processBar
 	processBar = Sprite::create("Arrow.png");
-	processBar->setAnchorPoint(Vec2(0, 0.5));
-	processBar->setPosition(230, 230); // 蓄力条位置
-	processBar->setScale(0.18, 0.18);
+	processBar->setPosition(220, 320); // 蓄力条位置
+	processBar->setScale(0.2, 0.2);
 	processBar->setVisible(false);
-	processBarPoint.setPoint(processBar->getPosition().x, processBar->getPosition().y);
+	
 	this->addChild(processBar, 0);
 
 	// to cover processBar
 	processBarCover = Sprite::create("ArrowCover.png");
 	timer = ProgressTimer::create(processBarCover); // progressTimer
-	timer->setAnchorPoint(Vec2(0, 0.5));
-	timer->setPosition(230, 230);
+	timer->setPosition(220, 320);
 	timer->setType(kCCProgressTimerTypeBar);
 	timer->setBarChangeRate(Vec2(1, 0));
 	timer->setMidpoint(Vec2(0, 0));
-	timer->setScale(0.18, 0.18);
+	timer->setScale(0.2, 0.2);
 	this->addChild(timer, 0);
 
 	// event listener
@@ -131,13 +156,7 @@ bool HelloPhysicsWorld::init()
 	// AI攻击
 	schedule(schedule_selector(HelloPhysicsWorld::updateEnemyAttack), 3.0f);
 
-	//定义世界的边界
-	auto body = PhysicsBody::createEdgeBox(borderSize);
-	body->setContactTestBitmask(0x01);
-	auto edgeNode = Node::create();                                         
-	edgeNode->setPosition(Vec2(visibleSize.width / 2, visibleSize.height / 2));               
-	edgeNode->setPhysicsBody(body);
-	this->addChild(edgeNode);                                            
+	                                           
 	setTouchEnabled(true);                                              
 	//设置为单点触摸
 	setTouchMode(Touch::DispatchMode::ONE_BY_ONE);
@@ -446,6 +465,8 @@ void HelloPhysicsWorld::rotateArrow(Point touchPoint)
 	processBar->runAction(Sequence::create(RotateTo::create(rotateDuration, rotateDegrees),
 		NULL));
 	timer->runAction(Sequence::create(RotateTo::create(rotateDuration, rotateDegrees),
+		NULL));
+	left_head->runAction(Sequence::create(RotateTo::create(rotateDuration, rotateDegrees),
 		NULL));
 }
 

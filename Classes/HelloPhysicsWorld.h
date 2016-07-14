@@ -43,6 +43,8 @@ public:
 
 private:
 	Label* label;
+	Sprite* left_head;
+	Sprite* right_head;
 	Sprite* processBar;
 	Sprite* processBarCover;
 	Point processBarPoint;
