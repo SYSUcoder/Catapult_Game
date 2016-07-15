@@ -27,6 +27,9 @@ public:
 	void updateOneCollison(float dt);
 	void scheduleFunc(float dt);
 	void updateEnemyAttack(float dt);
+	void updateEnemySilence(float dt);
+	void updateOurSilence(float dt);
+	void updateTime(float dt);
 
 	void rotateArrow(Point point);
 
@@ -40,13 +43,18 @@ public:
 	void createBlock(Point p);
 	void createUnderBlock(Point p);
 	void createTombstone(Point p);
+	void createEnemySilence(Point p);
+	void createOurSilence(Point p);
 
 private:
 	Label* label;
+	Label* timeLabel;
 	Sprite* left_head;
 	Sprite* right_head;
 	Sprite* processBar;
 	Sprite* processBarCover;
+	Sprite* enemySilence;
+	Sprite* ourbatterySilence;
 	Point processBarPoint;
 	Point preTouchPoint;
 	Point currTouchPoint;
@@ -60,6 +68,9 @@ private:
 	cocos2d::Size visibleSize;
 	int winTheGame;
 	int loseTheGame;
+	int remainTime;
+	bool isEnemyAttack;
+	bool isOurAttack;
 };
 
 

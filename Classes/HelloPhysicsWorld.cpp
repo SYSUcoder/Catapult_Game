@@ -13,7 +13,7 @@ USING_NS_CC;
 Scene* HelloPhysicsWorld::createScene()
 {
 	auto scene = Scene::createWithPhysics(); 
-	scene->getPhysicsWorld()->setDebugDrawMask(PhysicsWorld::DEBUGDRAW_ALL);   
+	// scene->getPhysicsWorld()->setDebugDrawMask(PhysicsWorld::DEBUGDRAW_ALL);   
 
 	auto layer = HelloPhysicsWorld::create();
 	scene->addChild(layer);
@@ -40,6 +40,9 @@ bool HelloPhysicsWorld::init()
 	borderSize = cocos2d::Size(1024 * 1.3, 500);
 	preTouchPoint = Vec2::ZERO;
 	currTouchPoint = Vec2::ZERO;
+	isEnemyAttack = true;
+	isOurAttack = true;
+	remainTime = 60;
 
 	//定义世界的边界
 	auto body = PhysicsBody::createEdgeBox(Size(borderSize.width, borderSize.height + 25));
@@ -56,11 +59,23 @@ bool HelloPhysicsWorld::init()
 	addChild(mapSprite, 0);
 
 	// test label
-	HelloPhysicsWorld::label = Label::create();
+	label = Label::createWithTTF("", "fonts/Marker Felt.ttf", 40);
 	label->setPosition(Vec2(50, visibleSize.height - 50));
 	label->setAnchorPoint(Vec2::ZERO);
-	label->setSystemFontSize(30);
-	this->addChild(label, 1);
+	addChild(label, 1);
+
+	// time label
+	timeLabel = Label::createWithTTF("", "fonts/Marker Felt.ttf", 70);
+	timeLabel->setPosition(Vec2(visibleSize.width / 2, visibleSize.height - 85));
+	timeLabel->setColor(Color3B::GREEN);
+	stringstream ss;
+	ss << remainTime;
+	timeLabel->setString(ss.str());
+	ss.str("");
+	addChild(timeLabel, 1);
+
+	// decrease time
+	schedule(schedule_selector(HelloPhysicsWorld::updateTime), 1.0f);
 
 	// our battery
 	mapSprite = Sprite::create("body.png");
@@ -73,7 +88,7 @@ bool HelloPhysicsWorld::init()
 	mapSprite->setPhysicsBody(batteryBody);
 	// 设置掩码
 	mapSprite->getPhysicsBody()->setCategoryBitmask(0x01F);
-	mapSprite->getPhysicsBody()->setContactTestBitmask(0x01);
+	mapSprite->getPhysicsBody()->setContactTestBitmask(0x03);
 	mapSprite->getPhysicsBody()->setCollisionBitmask(0x01F);
 	addChild(mapSprite);
 
@@ -82,6 +97,14 @@ bool HelloPhysicsWorld::init()
 	processBarPoint.setPoint(left_head->getPosition().x, left_head->getPosition().y);
 	left_head->setScale(0.2, 0.2);
 	left_head->setTag(7);
+
+	batteryBody = PhysicsBody::createBox(Size(left_head->getContentSize().width * 0.5, left_head->getContentSize().height * 0.5));
+	batteryBody->setDynamic(false);
+	left_head->setPhysicsBody(batteryBody);
+	// 设置掩码
+	left_head->getPhysicsBody()->setCategoryBitmask(0x01F);
+	left_head->getPhysicsBody()->setContactTestBitmask(0x03);
+	left_head->getPhysicsBody()->setCollisionBitmask(0x01F);
 	
 	addChild(left_head);
 	
@@ -106,6 +129,14 @@ bool HelloPhysicsWorld::init()
 	right_head->setScale(0.2, 0.2);
 	right_head->setTag(10);
 
+	batteryBody = PhysicsBody::createBox(Size(right_head->getContentSize().width * 0.5, right_head->getContentSize().height * 0.5));
+	batteryBody->setDynamic(false);
+	right_head->setPhysicsBody(batteryBody);
+	// 设置掩码
+	right_head->getPhysicsBody()->setCategoryBitmask(0x01F);
+	right_head->getPhysicsBody()->setContactTestBitmask(0x01);
+	right_head->getPhysicsBody()->setCollisionBitmask(0x01F);
+
 	addChild(right_head);
 
 	double increase_height = 100;
@@ -123,11 +154,11 @@ bool HelloPhysicsWorld::init()
 	createOurPig(Vec2(visibleSize.width - 777, 179 + increase_height));
 
 	// middle block
-
+	/*
 	createBlock(Vec2(visibleSize.width / 2, 275));
 	createBlock(Vec2(visibleSize.width / 2, 325));
 	createBlock(Vec2(visibleSize.width / 2, 375));
-
+	*/
 	// processBar
 	processBar = Sprite::create("Arrow.png");
 	processBar->setPosition(220, 320); // 蓄力条位置
@@ -154,7 +185,7 @@ bool HelloPhysicsWorld::init()
 	Director::getInstance()->getEventDispatcher()->addEventListenerWithSceneGraphPriority(listener, this);
 
 	// AI攻击
-	schedule(schedule_selector(HelloPhysicsWorld::updateEnemyAttack), 3.0f);
+	schedule(schedule_selector(HelloPhysicsWorld::updateEnemyAttack), 2.0f);
 
 	                                           
 	setTouchEnabled(true);                                              
@@ -173,9 +204,13 @@ bool HelloPhysicsWorld::onTouchBegan(Touch* touch, Event* event)
 		preTouchPoint = currTouchPoint;
 	}
 	// processBar begin increasing
-	speed = Vec2::ZERO;
-	schedule(schedule_selector(HelloPhysicsWorld::scheduleFunc), 0.02f);
-	processBar->setVisible(true);
+	if (isOurAttack)
+	{
+		speed = Vec2::ZERO;
+		schedule(schedule_selector(HelloPhysicsWorld::scheduleFunc), 0.02f);
+		processBar->setVisible(true);
+	}
+	
 	
 	// show the position of mouse
 	stringstream ss;
@@ -213,10 +248,13 @@ void HelloPhysicsWorld::onTouchMoved(Touch* touch, Event* event)
 void HelloPhysicsWorld::onTouchEnded(Touch* touch, Event* event)
 {
 	currTouchPoint = touch->getLocation();
-	createOurBird();
-	unschedule(schedule_selector(HelloPhysicsWorld::scheduleFunc));
-	timer->setPercentage(0);
-	processBar->setVisible(false);
+	if (isOurAttack)
+	{
+		createOurBird();
+		unschedule(schedule_selector(HelloPhysicsWorld::scheduleFunc));
+		timer->setPercentage(0);
+		processBar->setVisible(false);
+	}
 }
 
 
@@ -263,6 +301,50 @@ bool HelloPhysicsWorld::onContactBegin(PhysicsContact& contact)
 				auto scene = FinishScene::createScene();
 				Director::sharedDirector()->replaceScene(scene);
 			}
+		}
+		else if ((nodeA->getTag() == 5 && nodeB->getTag() == 10) || (nodeA->getTag() == 10 && nodeB->getTag() == 5))
+		{
+			if (nodeA->getTag() == 5)
+			{
+				collisionPointA = contact.getShapeA()->getBody()->getPosition();
+				nodeA->removeFromParentAndCleanup(true);
+			}
+			else
+			{
+				collisionPointA = contact.getShapeB()->getBody()->getPosition();
+				nodeB->removeFromParentAndCleanup(true);
+			}
+			scheduleOnce(schedule_selector(HelloPhysicsWorld::updateOneCollison), 0.01f);
+			
+			if (isEnemyAttack)
+			{
+				createEnemySilence(Vec2(right_head->getPosition().x + 20, right_head->getPosition().y + 35));
+				scheduleOnce(schedule_selector(HelloPhysicsWorld::updateEnemySilence), 5.0f);
+			}
+				
+			isEnemyAttack = false;
+		}
+		else if ((nodeA->getTag() == 7 && nodeB->getTag() == 8) || (nodeA->getTag() == 8 && nodeB->getTag() == 7))
+		{
+			if (nodeA->getTag() == 8)
+			{
+				collisionPointA = contact.getShapeA()->getBody()->getPosition();
+				nodeA->removeFromParentAndCleanup(true);
+			}
+			else
+			{
+				collisionPointA = contact.getShapeB()->getBody()->getPosition();
+				nodeB->removeFromParentAndCleanup(true);
+			}
+			scheduleOnce(schedule_selector(HelloPhysicsWorld::updateOneCollison), 0.01f);
+			
+			if (isOurAttack)
+			{
+				createOurSilence(Vec2(left_head->getPosition().x - 20, left_head->getPosition().y + 35));
+				scheduleOnce(schedule_selector(HelloPhysicsWorld::updateOurSilence), 5.0f);
+			}
+				
+			isOurAttack = false;
 		}
 		else  // delete low speed bird
 		{
@@ -444,6 +526,7 @@ void HelloPhysicsWorld::createTombstone(Point p)
 	auto tombSprite = Sprite::create("tombstone.png");
 	tombSprite->setPosition(p);
 	tombSprite->setTag(11);
+	tombSprite->setScale(0.05, 0.05);
 	auto body = PhysicsBody::createBox(tombSprite->getContentSize());
 	tombSprite->setPhysicsBody(body);
 
@@ -452,6 +535,23 @@ void HelloPhysicsWorld::createTombstone(Point p)
 	tombSprite->getPhysicsBody()->setContactTestBitmask(0x01);
 	tombSprite->getPhysicsBody()->setCollisionBitmask(0x08);
 	addChild(tombSprite, 0);
+}
+
+// silence after being attacked
+void HelloPhysicsWorld::createEnemySilence(Point p)
+{
+	enemySilence = Sprite::create("silence.png");
+	enemySilence->setPosition(p);
+	enemySilence->setScale(0.5, 0.5);
+	addChild(enemySilence);
+}
+
+void HelloPhysicsWorld::createOurSilence(Point p)
+{
+	ourbatterySilence = Sprite::create("our_silence.png");
+	ourbatterySilence->setPosition(p);
+	ourbatterySilence->setScale(0.5, 0.5);
+	addChild(ourbatterySilence);
 }
 
 // rotate processbar
@@ -495,5 +595,37 @@ void HelloPhysicsWorld::updateOneCollison(float dt)
 
 void HelloPhysicsWorld::updateEnemyAttack(float dt)
 {
-	createEnemyBird(Point(visibleSize.width - processBarPoint.x, processBarPoint.y));
+	if (isEnemyAttack)
+		createEnemyBird(Point(visibleSize.width - processBarPoint.x, processBarPoint.y));
+}
+
+void HelloPhysicsWorld::updateEnemySilence(float dt)
+{
+	isEnemyAttack = true;
+	enemySilence->removeFromParentAndCleanup(true);
+}
+
+void HelloPhysicsWorld::updateOurSilence(float dt)
+{
+	isOurAttack = true;
+	ourbatterySilence->removeFromParentAndCleanup(true);
+}
+
+void HelloPhysicsWorld::updateTime(float dt)
+{
+	remainTime--;
+	stringstream ss;
+	ss << remainTime;
+	timeLabel->setString(ss.str());
+	ss.str("");
+	if (remainTime == 10)
+	{
+		timeLabel->setColor(Color3B::RED);
+	}
+	if (remainTime <= 0)
+	{
+		UserDefault::getInstance()->setBoolForKey("isWin", false);
+		auto scene = FinishScene::createScene();
+		Director::sharedDirector()->replaceScene(scene);
+	}
 }

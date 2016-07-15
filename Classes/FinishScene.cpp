@@ -22,9 +22,8 @@ bool FinishScene::init()
 	Size visibleSize = Director::getInstance()->getVisibleSize();
 	Vec2 origin = Director::getInstance()->getVisibleOrigin();
 
-	auto label = Label::create();
-	label->setPosition(Vec2(visibleSize.width / 2, visibleSize.height / 2));
-	label->setSystemFontSize(70);
+	auto label = Label::createWithTTF("", "fonts/Marker Felt.ttf", 60);
+	label->setPosition(Vec2(visibleSize.width / 2, visibleSize.height / 2 + 200));
 	if (UserDefault::getInstance()->getBoolForKey("isWin"))
 	{
 		label->setString("You defeat AlphaGo!");
@@ -35,9 +34,7 @@ bool FinishScene::init()
 	}
 	addChild(label, 1);
 
-	MenuItemFont::setFontName("Marker Felt");
-	MenuItemFont::setFontSize(40);
-	MenuItemFont* newGame = MenuItemFont::create("Restart", this, menu_selector(FinishScene::onNewGame));
+	auto newGame = MenuItemLabel::create(Label::createWithTTF("Restart", "fonts/Marker Felt.ttf", 60), this, menu_selector(FinishScene::onNewGame));
 
 	auto menu = Menu::createWithItem(newGame);
 	menu->alignItemsVertically();

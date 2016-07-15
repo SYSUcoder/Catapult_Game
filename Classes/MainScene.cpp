@@ -23,9 +23,7 @@ bool MainScene::init()
 	Vec2 origin = Director::getInstance()->getVisibleOrigin();
 
 	
-	MenuItemFont::setFontName("Marker Felt");
-	MenuItemFont::setFontSize(40);
-	MenuItemFont* newGame = MenuItemFont::create("New Game", this, menu_selector(MainScene::onNewGame));
+	auto newGame = MenuItemLabel::create(Label::createWithTTF("New Game", "fonts/Marker Felt.ttf", 60), this, menu_selector(MainScene::onNewGame));
 
 	auto menu = Menu::createWithItem(newGame);
 	menu->alignItemsVertically();
