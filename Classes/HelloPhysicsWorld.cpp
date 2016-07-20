@@ -13,7 +13,7 @@ USING_NS_CC;
 Scene* HelloPhysicsWorld::createScene()
 {
 	auto scene = Scene::createWithPhysics(); 
-	// scene->getPhysicsWorld()->setDebugDrawMask(PhysicsWorld::DEBUGDRAW_ALL);   
+	scene->getPhysicsWorld()->setDebugDrawMask(PhysicsWorld::DEBUGDRAW_ALL);   
 
 	auto layer = HelloPhysicsWorld::create();
 	scene->addChild(layer);
@@ -24,7 +24,7 @@ Scene* HelloPhysicsWorld::createScene()
 
 // Tag:   5 is our bird, 6 is enemy's pigPoint, 7 is our battery
 // Tag:   8 is enemy's bird, 9 is our pigPoint, 10 is enemy's battery
-// Tag:   11 is tombstone
+// Tag:   11 is tombstone, 12 is ice item
 
 bool HelloPhysicsWorld::init()
 {
@@ -43,10 +43,15 @@ bool HelloPhysicsWorld::init()
 	isEnemyAttack = true;
 	isOurAttack = true;
 	remainTime = 60;
+	ourBirdCount = 0;
+	enemyBirdCount = 0;
 
 	//定义世界的边界
 	auto body = PhysicsBody::createEdgeBox(Size(borderSize.width, borderSize.height + 25));
+	// 设置掩码
+	body->setCategoryBitmask(0x01F);
 	body->setContactTestBitmask(0x01);
+	body->setCollisionBitmask(0x01F);
 	auto edgeNode = Node::create();
 	edgeNode->setPosition(Vec2(visibleSize.width / 2, visibleSize.height / 2 + 95));
 	edgeNode->setPhysicsBody(body);
@@ -154,11 +159,15 @@ bool HelloPhysicsWorld::init()
 	createOurPig(Vec2(visibleSize.width - 777, 179 + increase_height));
 
 	// middle block
-	/*
+	
 	createBlock(Vec2(visibleSize.width / 2, 275));
-	createBlock(Vec2(visibleSize.width / 2, 325));
-	createBlock(Vec2(visibleSize.width / 2, 375));
-	*/
+	createRepeatActionBlock(Point(visibleSize.width / 2, 375), Point(visibleSize.width / 2, 275), 1);
+	createBlock(Vec2(visibleSize.width / 2, 385));
+	createRepeatActionBlock(Point(visibleSize.width / 2, 485), Point(visibleSize.width / 2, 385), 2);
+	createBlock(Vec2(visibleSize.width / 2, 495));
+	createRepeatActionBlock(Point(visibleSize.width / 2, 595), Point(visibleSize.width / 2, 495), 3);
+
+
 	// processBar
 	processBar = Sprite::create("Arrow.png");
 	processBar->setPosition(220, 320); // 蓄力条位置
@@ -187,6 +196,8 @@ bool HelloPhysicsWorld::init()
 	// AI攻击
 	schedule(schedule_selector(HelloPhysicsWorld::updateEnemyAttack), 2.0f);
 
+	// item appears
+	schedule(schedule_selector(HelloPhysicsWorld::updateIceItem), 3.0f);
 	                                           
 	setTouchEnabled(true);                                              
 	//设置为单点触摸
@@ -265,7 +276,7 @@ bool HelloPhysicsWorld::onContactBegin(PhysicsContact& contact)
 
 	if (nodeA && nodeB)
 	{
-		// collision of our bird and enemy's pig
+		// collision of our bird and enemy's bird
 		if ((nodeA->getTag() == 5 && nodeB->getTag() == 8) || (nodeA->getTag() == 8 && nodeB->getTag() == 5))
 		{
 			collisionPointA = contact.getShapeA()->getBody()->getPosition();
@@ -274,6 +285,7 @@ bool HelloPhysicsWorld::onContactBegin(PhysicsContact& contact)
 			nodeA->removeFromParentAndCleanup(true);
 			nodeB->removeFromParentAndCleanup(true);
 		}
+		// collision of our bird and enemy's pig
 		else if ((nodeA->getTag() == 5 && nodeB->getTag() == 6) || (nodeA->getTag() == 6 && nodeB->getTag() == 5))
 		{
 			collisionPointA = contact.getShapeA()->getBody()->getPosition();
@@ -288,6 +300,7 @@ bool HelloPhysicsWorld::onContactBegin(PhysicsContact& contact)
 				Director::sharedDirector()->replaceScene(scene);
 			}
 		}
+		// collision of enemy's bird and our pig
 		else if ((nodeA->getTag() == 8 && nodeB->getTag() == 9) || (nodeA->getTag() == 9 && nodeB->getTag() == 8))
 		{
 			collisionPointA = contact.getShapeA()->getBody()->getPosition();
@@ -302,6 +315,7 @@ bool HelloPhysicsWorld::onContactBegin(PhysicsContact& contact)
 				Director::sharedDirector()->replaceScene(scene);
 			}
 		}
+		// collision of our bird and enemy's battery
 		else if ((nodeA->getTag() == 5 && nodeB->getTag() == 10) || (nodeA->getTag() == 10 && nodeB->getTag() == 5))
 		{
 			if (nodeA->getTag() == 5)
@@ -324,6 +338,7 @@ bool HelloPhysicsWorld::onContactBegin(PhysicsContact& contact)
 				
 			isEnemyAttack = false;
 		}
+		// collision of enemy's bird and our battery
 		else if ((nodeA->getTag() == 7 && nodeB->getTag() == 8) || (nodeA->getTag() == 8 && nodeB->getTag() == 7))
 		{
 			if (nodeA->getTag() == 8)
@@ -345,6 +360,54 @@ bool HelloPhysicsWorld::onContactBegin(PhysicsContact& contact)
 			}
 				
 			isOurAttack = false;
+		}
+		// collision of our bird and iceItem
+		else if ((nodeA->getTag() == 5 && nodeB->getTag() == 12) || (nodeA->getTag() == 12 && nodeB->getTag() == 5))
+		{
+			if (nodeA->getTag() == 5)
+			{
+				collisionPointA = contact.getShapeA()->getBody()->getPosition();
+				scheduleOnce(schedule_selector(HelloPhysicsWorld::updateOneCollison), 0.01f);
+				nodeA->removeFromParentAndCleanup(true);
+				nodeB->removeFromParentAndCleanup(true);
+			}
+			else
+			{
+				collisionPointA = contact.getShapeB()->getBody()->getPosition();
+				scheduleOnce(schedule_selector(HelloPhysicsWorld::updateOneCollison), 0.01f);
+				nodeA->removeFromParentAndCleanup(true);
+				nodeB->removeFromParentAndCleanup(true);
+			}
+			auto it = enemyBirdVec.begin();
+			while (it != enemyBirdVec.end())
+			{
+				(*it)->getPhysicsBody()->setVelocity(Vec2(0, 0));
+				it++;
+			}
+		}
+		// collision of enemy's bird and iceItem
+		else if ((nodeA->getTag() == 8 && nodeB->getTag() == 12) || (nodeA->getTag() == 12 && nodeB->getTag() == 8))
+		{
+			if (nodeA->getTag() == 8)
+			{
+				collisionPointA = contact.getShapeA()->getBody()->getPosition();
+				scheduleOnce(schedule_selector(HelloPhysicsWorld::updateOneCollison), 0.01f);
+				nodeA->removeFromParentAndCleanup(true);
+				nodeB->removeFromParentAndCleanup(true);
+			}
+			else
+			{
+				collisionPointA = contact.getShapeB()->getBody()->getPosition();
+				scheduleOnce(schedule_selector(HelloPhysicsWorld::updateOneCollison), 0.01f);
+				nodeA->removeFromParentAndCleanup(true);
+				nodeB->removeFromParentAndCleanup(true);
+			}
+			auto it = ourBirdVec.begin();
+			while (it != ourBirdVec.end())
+			{
+				(*it)->getPhysicsBody()->setVelocity(Vec2(0, 0));
+				it++;
+			}
 		}
 		else  // delete low speed bird
 		{
@@ -387,29 +450,37 @@ void onContactPostSolve(PhysicsContact& contact)
 */
 
 /*
-* enemy_pig :  category   11
-*              contact    01
-*              collision  01
-*
-* bird:        category   01
-*			   contact    10
-*			   collision  01
-*
-* our_p:       category   110
-*			   contact    01
-*			   collision  110
-*
-* enemy:	   category   11
-*			   contact    01
-*			   collision  11
-*
-* block:       category   101
-*			   contact    101
-*			   collision  101
-*
-* tomb:        category   10001
-*              contact    01
-*              collision  1100
+pig :  category   11
+		contact    01
+		collision  01
+
+bird:  category   101
+		contact    1001
+		collision  101
+
+our_p: category   1010
+		contact    101
+		collision  1010
+
+enemy: category   1110
+		contact    1001
+		collision  11
+
+block: category   11111
+		contact    01
+		collision  11111
+
+tomb:  category   10000
+		contact    01
+		collision  1000
+
+our_b  category   11111
+		contact    11
+		collision  11111
+
+ene_b  category   11111
+		contact    01
+		collision  11111
 */
 
 void HelloPhysicsWorld::createOurBird()                                 
@@ -427,11 +498,14 @@ void HelloPhysicsWorld::createOurBird()
 	sp->setPosition(processBarPoint);
 
 	// 设置掩码
-	sp->getPhysicsBody()->setCategoryBitmask(0x05);
+	sp->getPhysicsBody()->setCategoryBitmask(0x025);
 	sp->getPhysicsBody()->setContactTestBitmask(0x09);
 	sp->getPhysicsBody()->setCollisionBitmask(0x05);
 
 	this->addChild(sp, 1);
+
+	ourBirdVec.pushBack(sp);
+	ourBirdCount++;
 }
 
 void HelloPhysicsWorld::createEnemyBird(Point p)
@@ -447,10 +521,13 @@ void HelloPhysicsWorld::createEnemyBird(Point p)
 	sp->setPhysicsBody(body);
 	sp->setPosition(p);
 	// 设置掩码
-	sp->getPhysicsBody()->setCategoryBitmask(0x0E);
+	sp->getPhysicsBody()->setCategoryBitmask(0x02E);
 	sp->getPhysicsBody()->setContactTestBitmask(0x09);
 	sp->getPhysicsBody()->setCollisionBitmask(0x03);
 	addChild(sp, 1);
+
+	enemyBirdVec.pushBack(sp);
+	enemyBirdCount++;
 }
 
 
@@ -494,15 +571,17 @@ void HelloPhysicsWorld::createOurPig(Point p)
 void HelloPhysicsWorld::createBlock(Point p)
 {
 	Point temp = p;
-	auto blockSprite = Sprite::create("block1.png");
+	blockSprite = Sprite::create("block1.png");
 	blockSprite->setPosition(temp);
 	auto body = PhysicsBody::createBox(blockSprite->getContentSize());
 	body->setDynamic(false);
 	blockSprite->setPhysicsBody(body);
+	
 	// 设置掩码
 	blockSprite->getPhysicsBody()->setCategoryBitmask(0x01F);
 	blockSprite->getPhysicsBody()->setContactTestBitmask(0x01);
 	blockSprite->getPhysicsBody()->setCollisionBitmask(0x01F);
+
 	addChild(blockSprite, 1);
 }
 
@@ -552,6 +631,15 @@ void HelloPhysicsWorld::createOurSilence(Point p)
 	ourbatterySilence->setPosition(p);
 	ourbatterySilence->setScale(0.5, 0.5);
 	addChild(ourbatterySilence);
+}
+
+void HelloPhysicsWorld::createRepeatActionBlock(Point p1, Point p2, double t)
+{
+	auto moveTo = MoveTo::create(t, p1);
+	auto moveBack = MoveTo::create(t, p2);
+	auto action = Sequence::create(moveTo, moveBack, NULL);
+	auto repeat = RepeatForever::create(action);
+	blockSprite->runAction(repeat);
 }
 
 // rotate processbar
@@ -629,3 +717,26 @@ void HelloPhysicsWorld::updateTime(float dt)
 		Director::sharedDirector()->replaceScene(scene);
 	}
 }
+
+void HelloPhysicsWorld::updateIceItem(float dt)
+{
+	Point p = Point(cocos2d::random(300, 800), random(300, 800));
+	auto itemSprite = Sprite::create("iceItem.png");
+	itemSprite->setPosition(p);
+	itemSprite->setScale(0.3, 0.3);
+	itemSprite->setTag(12);
+	auto itemBody = PhysicsBody::createCircle(itemSprite->getContentSize().width / 2);
+	itemBody->setGravityEnable(false);
+	itemBody->setVelocity(Vec2(0, -30));
+	itemSprite->setPhysicsBody(itemBody);
+	// 设置掩码
+	itemSprite->getPhysicsBody()->setCategoryBitmask(0x0F);
+	itemSprite->getPhysicsBody()->setContactTestBitmask(0x03);
+	itemSprite->getPhysicsBody()->setCollisionBitmask(0x020);
+
+	iceItemVec.pushBack(itemSprite);
+
+
+	addChild(itemSprite, 1);
+}
+

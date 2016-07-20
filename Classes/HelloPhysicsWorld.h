@@ -30,6 +30,7 @@ public:
 	void updateEnemySilence(float dt);
 	void updateOurSilence(float dt);
 	void updateTime(float dt);
+	void updateIceItem(float dt);
 
 	void rotateArrow(Point point);
 
@@ -45,6 +46,7 @@ public:
 	void createTombstone(Point p);
 	void createEnemySilence(Point p);
 	void createOurSilence(Point p);
+	void createRepeatActionBlock(Point p1, Point p2, double t);
 
 private:
 	Label* label;
@@ -54,6 +56,7 @@ private:
 	Sprite* processBar;
 	Sprite* processBarCover;
 	Sprite* enemySilence;
+	Sprite* blockSprite;
 	Sprite* ourbatterySilence;
 	Point processBarPoint;
 	Point preTouchPoint;
@@ -61,6 +64,7 @@ private:
 	Point speed;
 	Point collisionPointA;
 	Point collisionPointB;
+	Point icePoint;
 	ProgressTimer* timer;
 	double rotateRadians;
 	double rotateDegrees;
@@ -71,6 +75,11 @@ private:
 	int remainTime;
 	bool isEnemyAttack;
 	bool isOurAttack;
+	Vector<Sprite*> ourBirdVec;
+	int ourBirdCount;
+	Vector<Sprite*> enemyBirdVec;
+	int enemyBirdCount;
+	Vector<Sprite*> iceItemVec;
 };
 
 
