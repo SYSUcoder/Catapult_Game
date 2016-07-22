@@ -1,9 +1,10 @@
-#ifndef __HelloPhysicsWorld_SCENE_H__
-#define __HelloPhysicsWorld_SCENE_H__
+#ifndef __HELLOPHYSICSWORLD_H__
+#define __HELLOPHYSICSWORLD_H__
 
 
 #include "cocos2d.h"
 #include "FinishScene.h"
+#include "Action.h"
 
 USING_NS_CC;
 
@@ -36,32 +37,17 @@ public:
 
 	CREATE_FUNC(HelloPhysicsWorld);
 
-
-	void createOurBird();
-	void createEnemyBird(Point p);
-	void createPigPoint(Point p);
-	void createOurPig(Point p);
-	void createBlock(Point p);
-	void createUnderBlock(Point p);
-	void createTombstone(Point p);
-	void createEnemySilence(Point p);
-	void createOurSilence(Point p);
-	void createRepeatActionBlock(Point p1, Point p2, double t);
-	void createIceItem(Point p);
-	void createTimeItem(Point p);
-	void createDefendItem(Point p);
-
 private:
+	My_Action* actionManager;
+
 	Label* label;
 	Label* timeLabel;
-	Sprite* left_head;
-	Sprite* right_head;
+
 	Sprite* processBar;
 	Sprite* processBarCover;
 	Sprite* enemySilence;
-	Sprite* blockSprite;
 	Sprite* ourbatterySilence;
-	Sprite* itemSprite;
+
 	Point processBarPoint;
 	Point preTouchPoint;
 	Point currTouchPoint;
@@ -69,9 +55,9 @@ private:
 	Point collisionPointA;
 	Point collisionPointB;
 	Point icePoint;
-	ProgressTimer* timer;
-	double rotateRadians;
-	double rotateDegrees;
+
+	ProgressTimer* m_timer;
+
 	cocos2d::Size borderSize;
 	cocos2d::Size visibleSize;
 	int winTheGame;
@@ -86,4 +72,4 @@ private:
 };
 
 
-#endif // __HelloPhysicsWorld_SCENE_H__
+#endif
