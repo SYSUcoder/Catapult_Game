@@ -13,7 +13,7 @@ USING_NS_CC;
 Scene* HelloPhysicsWorld::createScene()
 {
 	auto scene = Scene::createWithPhysics(); 
-	scene->getPhysicsWorld()->setDebugDrawMask(PhysicsWorld::DEBUGDRAW_ALL);   
+	// scene->getPhysicsWorld()->setDebugDrawMask(PhysicsWorld::DEBUGDRAW_ALL);   
 
 	auto layer = HelloPhysicsWorld::create();
 	scene->addChild(layer);
@@ -35,7 +35,7 @@ bool HelloPhysicsWorld::init()
 
 	visibleSize = Director::getInstance()->getVisibleSize();
 	Vec2 origin = Director::getInstance()->getVisibleOrigin();
-	borderSize = cocos2d::Size(1024 * 1.3, 500);
+	borderSize = cocos2d::Size(1280, 500);
 	preTouchPoint = Vec2::ZERO;
 	currTouchPoint = Vec2::ZERO;
 
@@ -86,62 +86,62 @@ bool HelloPhysicsWorld::init()
 
 	// our battery
 	
-	actionManager->addIntoScene(this, actionManager->createOurBattery(Point(190, 230)), 1);
-	actionManager->addIntoScene(this, actionManager->createOurHead(Point(185, 275)), 1);
+	actionManager->addIntoScene(this, actionManager->createOurBattery(Point(140, 192)), 1);
+	actionManager->addIntoScene(this, actionManager->createOurHead(Point(135, 237)), 1);
 
 	// enemy's battery
 
-	actionManager->addIntoScene(this, actionManager->createEnemyBattery(Point(visibleSize.width - 190, 230)), 1);
-	actionManager->addIntoScene(this, actionManager->createEnemyHead(Point(visibleSize.width - 185, 275)), 1);
+	actionManager->addIntoScene(this, actionManager->createEnemyBattery(Point(visibleSize.width - 140, 192)), 1);
+	actionManager->addIntoScene(this, actionManager->createEnemyHead(Point(visibleSize.width - 135, 237)), 1);
 
-	// point pig
-	actionManager->addIntoScene(this, actionManager->createPigPoint(Point(882, 417)), 1);
-	actionManager->addIntoScene(this, actionManager->createPigPoint(Point(1282, 705)), 1);
-	actionManager->addIntoScene(this, actionManager->createPigPoint(Point(1284, 279)), 1);
-	actionManager->addIntoScene(this, actionManager->createPigPoint(Point(1193, 468)), 1);
-	actionManager->addIntoScene(this, actionManager->createPigPoint(Point(777, 279)), 1);
+	// our point pig
+	actionManager->addIntoScene(this, actionManager->createOurPig(Point(65, 280)), 1);
+	actionManager->addIntoScene(this, actionManager->createOurPig(Point(480, 235)), 1);
+	actionManager->addIntoScene(this, actionManager->createOurPig(Point(110, 430)), 1);
+	actionManager->addIntoScene(this, actionManager->createOurPig(Point(65, 660)), 1);
+	actionManager->addIntoScene(this, actionManager->createOurPig(Point(480, 660)), 1);
 	
 	double blockLower = 10;
 	// create under block
-	actionManager->addIntoScene(this, actionManager->createUnderBlock(Point(882, 417 - blockLower)), 1);
-	actionManager->addIntoScene(this, actionManager->createUnderBlock(Point(1282, 705 - blockLower)), 1);
-	actionManager->addIntoScene(this, actionManager->createUnderBlock(Point(1284, 279 - blockLower)), 1);
-	actionManager->addIntoScene(this, actionManager->createUnderBlock(Point(1193, 468 - blockLower)), 1);
-	actionManager->addIntoScene(this, actionManager->createUnderBlock(Point(777, 279 - blockLower)), 1);
+	actionManager->addIntoScene(this, actionManager->createUnderBlock(Point(65, 280 - blockLower)), 1);
+	actionManager->addIntoScene(this, actionManager->createUnderBlock(Point(480, 235 - blockLower)), 1);
+	actionManager->addIntoScene(this, actionManager->createUnderBlock(Point(110, 430 - blockLower)), 1);
+	actionManager->addIntoScene(this, actionManager->createUnderBlock(Point(65, 660 - blockLower)), 1);
+	actionManager->addIntoScene(this, actionManager->createUnderBlock(Point(480, 660 - blockLower)), 1);
 
-	// our point pig
-	actionManager->addIntoScene(this, actionManager->createOurPig(Point(visibleSize.width - 882, 417)), 1);
-	actionManager->addIntoScene(this, actionManager->createOurPig(Point(visibleSize.width - 1282, 705)), 1);
-	actionManager->addIntoScene(this, actionManager->createOurPig(Point(visibleSize.width - 1284, 279)), 1);
-	actionManager->addIntoScene(this, actionManager->createOurPig(Point(visibleSize.width - 1193, 468)), 1);
-	actionManager->addIntoScene(this, actionManager->createOurPig(Point(visibleSize.width - 777, 279)), 1);
+	// enemy point pig
+	actionManager->addIntoScene(this, actionManager->createPigPoint(Point(visibleSize.width - 65, 280)), 1);
+	actionManager->addIntoScene(this, actionManager->createPigPoint(Point(visibleSize.width - 480, 235)), 1);
+	actionManager->addIntoScene(this, actionManager->createPigPoint(Point(visibleSize.width - 110, 430)), 1);
+	actionManager->addIntoScene(this, actionManager->createPigPoint(Point(visibleSize.width - 65, 660)), 1);
+	actionManager->addIntoScene(this, actionManager->createPigPoint(Point(visibleSize.width - 480, 660)), 1);
 
 	// create under block
-	actionManager->addIntoScene(this, actionManager->createUnderBlock(Point(visibleSize.width - 882, 417 - blockLower)), 1);
-	actionManager->addIntoScene(this, actionManager->createUnderBlock(Point(visibleSize.width - 1282, 705 - blockLower)), 1);
-	actionManager->addIntoScene(this, actionManager->createUnderBlock(Point(visibleSize.width - 1284, 279 - blockLower)), 1);
-	actionManager->addIntoScene(this, actionManager->createUnderBlock(Point(visibleSize.width - 1193, 468 - blockLower)), 1);
-	actionManager->addIntoScene(this, actionManager->createUnderBlock(Point(visibleSize.width - 777, 279 - blockLower)), 1);
+	actionManager->addIntoScene(this, actionManager->createUnderBlock(Point(visibleSize.width - 65, 280 - blockLower)), 1);
+	actionManager->addIntoScene(this, actionManager->createUnderBlock(Point(visibleSize.width - 480, 235 - blockLower)), 1);
+	actionManager->addIntoScene(this, actionManager->createUnderBlock(Point(visibleSize.width - 110, 430 - blockLower)), 1);
+	actionManager->addIntoScene(this, actionManager->createUnderBlock(Point(visibleSize.width - 65, 660 - blockLower)), 1);
+	actionManager->addIntoScene(this, actionManager->createUnderBlock(Point(visibleSize.width - 480, 660 - blockLower)), 1);
 
 	// middle block and its action
 
-	actionManager->addIntoScene(this, actionManager->createBlock(Point(visibleSize.width / 2, 275)));
-	actionManager->createRepeatActionBlock(Point(visibleSize.width / 2, 375), Point(visibleSize.width / 2, 275), 2);
+	actionManager->addIntoScene(this, actionManager->createBlock(Point(visibleSize.width / 2, 225)));
+	actionManager->createRepeatActionBlock(Point(visibleSize.width / 2, 325), Point(visibleSize.width / 2, 225), 3);
 	/*
 	actionManager->addIntoScene(this, actionManager->createBlock(Point(visibleSize.width / 2, 385)));
 	actionManager->createRepeatActionBlock(Point(visibleSize.width / 2, 485), Point(visibleSize.width / 2, 385), 5);
 	*/
-	actionManager->addIntoScene(this, actionManager->createBlock(Point(visibleSize.width / 2, 495)));
-	actionManager->createRepeatActionBlock(Point(visibleSize.width / 2, 595), Point(visibleSize.width / 2, 495), 4);
+	actionManager->addIntoScene(this, actionManager->createBlock(Point(visibleSize.width / 2, 445)));
+	actionManager->createRepeatActionBlock(Point(visibleSize.width / 2, 505), Point(visibleSize.width / 2, 400), 5);
 
 	// processBar
-	processBar = (Sprite*)actionManager->createProcessBar(Point(220, 320));
-	actionManager->addIntoScene(this, processBar);
-	processBarPoint.setPoint(185, 275);
+	processBar = (Sprite*)actionManager->createProcessBar(Point(180, 260));
+	actionManager->addIntoScene(this, processBar, 2);
+	processBarPoint.setPoint(135, 237);
 
 	// to cover processBar
-	m_timer = (ProgressTimer*)actionManager->createProcessBarCover(Point(220, 320));
-	actionManager->addIntoScene(this, m_timer);
+	m_timer = (ProgressTimer*)actionManager->createProcessBarCover(Point(180, 260));
+	actionManager->addIntoScene(this, m_timer, 2);
 
 	// event listener
 	auto listener = EventListenerPhysicsContact::create();
@@ -153,7 +153,7 @@ bool HelloPhysicsWorld::init()
 	schedule(schedule_selector(HelloPhysicsWorld::updateEnemyAttack), 2.0f);
 
 	// item appears
-	schedule(schedule_selector(HelloPhysicsWorld::updateItem), 5.0f);
+	schedule(schedule_selector(HelloPhysicsWorld::updateItem), 10.0f);
 	                                           
 	setTouchEnabled(true);                                              
 	//设置为单点触摸
@@ -428,13 +428,16 @@ bool HelloPhysicsWorld::onContactBegin(PhysicsContact& contact)
 
 void HelloPhysicsWorld::scheduleFunc(float dt)
 {
-	auto increase = m_timer->getPercentage() + 1.4;
-	if (increase > 100) increase = 100;
-	m_timer->setPercentage(increase);
-
-	if (m_timer->getPercentage() >= 100)
+	if (isOurAttack)
 	{
-		unschedule(schedule_selector(HelloPhysicsWorld::scheduleFunc));
+		auto increase = m_timer->getPercentage() + 1.4;
+		if (increase > 100) increase = 100;
+		m_timer->setPercentage(increase);
+
+		if (m_timer->getPercentage() >= 100)
+		{
+			unschedule(schedule_selector(HelloPhysicsWorld::scheduleFunc));
+		}
 	}
 }
 
@@ -497,15 +500,15 @@ void HelloPhysicsWorld::updateItem(float dt)
 	int temp = (int)cocos2d::random(0, 3);
 	if (0 == temp)
 	{
-		actionManager->addIntoScene(this, actionManager->createIceItem(p));
+		actionManager->addIntoScene(this, actionManager->createIceItem(p), 1);
 	}
 	else if (1 == temp)
 	{
-		actionManager->addIntoScene(this, actionManager->createTimeItem(p));
+		actionManager->addIntoScene(this, actionManager->createTimeItem(p), 1);
 	}
 	else
 	{
-		actionManager->addIntoScene(this, actionManager->createDefendItem(p));
+		actionManager->addIntoScene(this, actionManager->createDefendItem(p), 1);
 	}
 }
 

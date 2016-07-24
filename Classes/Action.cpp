@@ -137,7 +137,7 @@ Node* My_Action::createEnemyHead(Point p)
 Node* My_Action::createProcessBar(Point p)
 {
 	processBar = Sprite::create("Arrow.png");
-	processBar->setPosition(220, 320); // 蓄力条位置
+	processBar->setPosition(p); // 蓄力条位置
 	processBar->setScale(0.2, 0.2);
 	processBar->setVisible(false);
 
@@ -148,7 +148,7 @@ Node* My_Action::createProcessBarCover(Point p)
 {
 	auto processBarCover = Sprite::create("ArrowCover.png");
 	timer = ProgressTimer::create(processBarCover); // progressTimer
-	timer->setPosition(220, 320);
+	timer->setPosition(p);
 	timer->setType(kCCProgressTimerTypeBar);
 	timer->setBarChangeRate(Vec2(1, 0));
 	timer->setMidpoint(Vec2(0, 0));
