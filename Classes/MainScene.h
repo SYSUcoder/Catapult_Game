@@ -17,6 +17,10 @@ public:
 	CREATE_FUNC(MainScene);
 
 	void onNewGame(Ref *Sender);
+	void onSettings(Ref *Sender);
+	void onHelp(Ref *Sender);
+	void onQuit(Ref *Sender);
+
 
 };
 

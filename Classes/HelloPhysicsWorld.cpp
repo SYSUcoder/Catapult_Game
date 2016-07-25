@@ -163,7 +163,7 @@ bool HelloPhysicsWorld::init()
 
 
 
-bool HelloPhysicsWorld::onTouchBegan(Touch* touch, Event* event)                 
+bool HelloPhysicsWorld::onTouchBegan(Touch* touch, Event* event)
 {
 	currTouchPoint = touch->getLocation();
 	if (!currTouchPoint.equals(preTouchPoint)){

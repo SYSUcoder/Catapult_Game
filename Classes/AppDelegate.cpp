@@ -1,4 +1,7 @@
 #include "AppDelegate.h"
+#include "SimpleAudioEngine.h"
+
+using namespace CocosDenshion;
 
 USING_NS_CC;
 
@@ -76,6 +79,8 @@ bool AppDelegate::applicationDidFinishLaunching() {
 	*/
 
 	register_all_packages();
+
+	SimpleAudioEngine::getInstance()->playBackgroundMusic("BGM/bgm.mp3", true);
 
 	// create a scene. it's an autorelease object
 	auto scene = MainScene::createScene();

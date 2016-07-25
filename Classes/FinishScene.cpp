@@ -47,7 +47,7 @@ void FinishScene::onNewGame(Ref *Sender)
 {
 	CCScene *scene = HelloPhysicsWorld::createScene();
 
-	CCDirector::sharedDirector()->replaceScene(CCTransitionSlideInR::create(1.2f, scene));
+	CCDirector::sharedDirector()->replaceScene(TransitionPageTurn::create(1.0f, scene, true));
 
 
 }
